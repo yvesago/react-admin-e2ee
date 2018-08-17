@@ -52,7 +52,7 @@ class PassAction extends Component {
                 console.log('salt: ' + salt);
 
                 // create key
-                const N = 1024, r = 8, p = 1, dkLen = 32;
+                const N = 16384, r = 8, p = 1, dkLen = 32;
                 scrypt(text2ua(pass), saltb, N, r, p, dkLen, function(error, progress, key) {
                     if (error) {
                         console.log('Error: ' + error);
