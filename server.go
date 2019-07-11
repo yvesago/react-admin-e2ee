@@ -3,9 +3,9 @@ package main
 import (
 	. "./models"
 
-	"time"
 	"github.com/gin-gonic/gin"
 	"github.com/itsjamie/gin-cors"
+	"time"
 )
 
 // SetConfig gin Middlware to push some config values
@@ -50,9 +50,14 @@ func main() {
 		v1.OPTIONS("/peoples", Options)     // POST
 		v1.OPTIONS("/peoples/:id", Options) // PUT, DELETE
 
-		v1.GET("/verifkey/:id", GetVerifKey)
-		v1.PUT("/verifkey/:id", UpdateVerifKey)
-		v1.OPTIONS("/verifkey", Options) // PUT
+		v1.GET("/vault", GetVaults)
+		v1.GET("/vault/:id", GetVault)
+		v1.POST("/vault", PostVault)
+		v1.PUT("/vault/:id", UpdateVault)
+		v1.DELETE("/vault/:id", DeleteVault)
+		v1.OPTIONS("/vault", Options)     // POST
+		v1.OPTIONS("/vault/:id", Options) // PUT, DELETE
+
 	}
 
 	r.Run("localhost:8088")

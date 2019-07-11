@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import CardActions from '@material-ui/core/CardActions';
 import { GET_LIST, UPDATE, GET_ONE, showNotification as showNotificationAction } from 'react-admin';
+import { ViewTitle } from 'react-admin';
 import { push as pushAction } from 'react-router-redux';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
@@ -17,15 +18,19 @@ import E2Econfig from './E2Econfig';
 const formStyle = { padding: '0 1em 3em 1em' };
 
 
-class PassReencrypt extends Component {
+class VaultReencrypt extends Component {
     constructor() {
         super();
         this.handleSubmit = this.handleSubmit.bind(this);
         const oldkey = localStorage.getItem('keyb64');
+        const vault = localStorage.getItem('vault');
+        const vaultid = localStorage.getItem('vaultid');
+        this.VaultName = vault;
+        this.VaultId = vaultid;
         this.OldKey = oldkey;
         this.OldSalt = (oldkey) ? localStorage.getItem('salt').substring(0,16) : '';
 
-        dataProvider(GET_ONE,'verifkey', {id: 1})
+        dataProvider(GET_ONE,'vault', {id: vaultid})
             .then((data) => {
                 const currentsalt = data.data.verifykey.substring(0,16);
                 const saltstring = localStorage.getItem('salt');
@@ -57,6 +62,8 @@ class PassReencrypt extends Component {
         const oldkey = this.OldKey;
         const oldsalt = this.OldSalt;
         const total = this.Totals;
+        const vaultid = this.VaultId;
+        const vaultname = this.VaultName;
 
         if (oldsalt === '') {
             showNotification('Error: no verif key stored ', 'warning');
@@ -84,9 +91,11 @@ class PassReencrypt extends Component {
                 localStorage.setItem('keyb64', keyb64);
 
                 // Update new verifkey
-                dataProvider(UPDATE,'verifkey', 
-                    { id: 1, // Useless ID
-                        data: { verifykey: salt + encrypt_tob64string(keyb64, vrfystr) } 
+                dataProvider(UPDATE,'vault', 
+                    { id: vaultid, 
+                        data: { 
+                            verifykey: salt + encrypt_tob64string(keyb64, vrfystr), 
+                            vaultname: vaultname } 
                     }) 
                     .then(() => {
                         console.error('verif key stored');
@@ -113,16 +122,16 @@ class PassReencrypt extends Component {
                                         if ( oldsalt === field.substring(0,16) ) {
                                             const oldField = decrypt_b64string(oldkey, field.substring(16));
                                             o[f] = oldField;
+                                            // Update o via REST
+                                            dataProvider(UPDATE,r,{ id: o.id, data: o } )
+                                                .catch((e) => {
+                                                    showNotification(e,'warning');
+                                                    return;
+                                                });
                                         }
                                     }
                                 });
-                                console.log(o);
-                                // Update o via REST
-                                dataProvider(UPDATE,r,{ id: o.id, data: o } )
-                                    .catch((e) => {
-                                        showNotification(e,'warning');
-                                        return;
-                                    });
+                                //console.log(o);
                             });
                         });
                 });
@@ -135,9 +144,11 @@ class PassReencrypt extends Component {
     render() {
         if (this.OldSalt !== '') 
         {
+            const name = 'Active Vault: "' + this.VaultName + '"';
             return (
                 <CardActions>
                     <form onSubmit={this.handleSubmit}>
+                        <ViewTitle title={name} />
                         <div style={formStyle}>
                             <TextField
                                 label="New Passphrase"
@@ -157,19 +168,22 @@ class PassReencrypt extends Component {
         else {
             return (
                 <CardActions>
-                    <form> <div style={formStyle}>Waiting for current passphrase</div>  </form>
+                    <div style={formStyle}>
+                        <ViewTitle title="No active vault" />
+                        Waiting to set the Passphrase
+                    </div>
                 </CardActions>
             );
         }
     }
 }
 
-PassReencrypt.propTypes = {
+VaultReencrypt.propTypes = {
     showNotification: PropTypes.func,
 };
 
 export default connect(null, {
     showNotification: showNotificationAction,
     push: pushAction,
-})(PassReencrypt);
+})(VaultReencrypt);
 

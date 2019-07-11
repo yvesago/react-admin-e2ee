@@ -12,9 +12,17 @@ import (
 	"strings"
 )
 
-var CurrentSalt string
+// TestValidSalt : test if key is a valid salt in vaults
+func TestValidSalt(dbmap *gorp.DbMap, test string) bool {
+        var vault Vault
+        err := dbmap.SelectOne(&vault, "SELECT id FROM vault WHERE verifykey LIKE ?", test+"%")
+        if err == nil && vault.Id != 0 {
+            return true
+        }
+        return false
+}
 
-// gin Middlware to select database
+// Database : gin Middlware to select database
 func Database(connString string) gin.HandlerFunc {
 	dbmap := InitDb(connString)
 	return func(c *gin.Context) {
@@ -23,6 +31,7 @@ func Database(connString string) gin.HandlerFunc {
 	}
 }
 
+// InitDb : create or update and connect to db on startup
 func InitDb(dbName string) *gorp.DbMap {
 	// XXX fix database type
 	db, err := sql.Open("sqlite3", dbName)
@@ -32,21 +41,23 @@ func InitDb(dbName string) *gorp.DbMap {
 	// XXX fix tables names
 	dbmap.AddTableWithName(People{}, "People").SetKeys(true, "Id")
 	dbmap.AddTableWithName(User{}, "User").SetKeys(true, "Id")
-	dbmap.AddTableWithName(Util{}, "Util").SetKeys(true, "Id")
+	dbmap.AddTableWithName(Vault{}, "Vault").SetKeys(true, "Id")
 	err = dbmap.CreateTablesIfNotExists()
 	checkErr(err, "Create tables failed")
 
-	var u Util
+	/*var u Util
 	dbmap.SelectOne(&u, "select * from Util where id = 1")
 	if u.Id != 1 {
 		dbmap.Insert(&u)
 	} else {
 		CurrentSalt = u.VerifyKey[0:16]
-	}
+	}*/
 
 	return dbmap
 }
 
+
+// ParseQuery : Parse a http query
 func ParseQuery(q map[string][]string) (string, string, string) {
 	query := ""
 	if q["_filters"] != nil {

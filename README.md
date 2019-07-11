@@ -9,7 +9,25 @@ WIP. Feedback and comments are welcome.
 
 |     |     |
 | --- | --- |
-| ![Encrypted field](img/E2Eencrypted.png) | ![Passphrase](img/E2Epasphrase.png) |
+| ![Encrypted field](img/WhithoutKey.png) | ![Partial](img/MultiKey.png) |
+| ![Vaults](img/Vaults.png) | ![Passphrase](img/VaultsPass.png) |
+
+
+### Release 1.0
+
+Simple shared key
+
+
+### Release 1.2
+
+Manage many shared key to create «vaults»
+
+
+### Release 2.0
+
+TODO: Add users with roles and public/private keys. Random key by vault. Store vault key for each users.
+
+
 
 ## Server
 
@@ -19,7 +37,7 @@ gin-model-template allows to quickly write database tables and REST handlers.
 
 For end to end encryption, server maintains a global variable of the passphrase salt and check that each encrypted field start with this salt.
 
-### Config
+### Custom Config
 - ``people.go`` and ``user.go`` are 2 samples tables which can be customized.
 - ``repo.go`` contains db parameters
 - ``server.go`` contains REST handlers

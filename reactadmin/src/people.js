@@ -1,10 +1,11 @@
 import React from 'react';
-import { List, Edit, Create, Datagrid, TextField, EditButton, 
-    DisabledInput, LongTextInput, DateInput, 
+import { List, Edit, Create, Datagrid, TextField, EditButton,
+    DisabledInput, LongTextInput, DateInput,
     SimpleForm, TextInput } from 'react-admin';
+import { VaultActions } from './VaultActions';
 
 export const PeopleList = (props) => (
-    <List {...props}>
+    <List actions={<VaultActions />} {...props}>
         <Datagrid>
             <TextField source="id" />
             <TextField source="name" />

@@ -36,7 +36,7 @@ func TestPeople(t *testing.T) {
 
 	b := new(bytes.Buffer)
 
-	router.PUT("/api/v1/utils/:id", UpdateVerifKey)
+	/*router.PUT("/api/v1/utils/:id", UpdateVerifKey)
 	log.Println("= http PUT one Util")
 	var k = Util{VerifyKey: "XXXXXXXXXXXXXXXX"}
 	json.NewEncoder(b).Encode(k)
@@ -44,7 +44,16 @@ func TestPeople(t *testing.T) {
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
-	assert.Equal(t, 200, resp.Code, "http PUT Salt key success")
+	assert.Equal(t, 200, resp.Code, "http PUT Salt key success")*/
+	log.Println("= http POST Vault")
+	router.PUT("/api/v1/vaults", PostVault)
+	var k = Vault{VerifyKey: "XXXXXXXXXXXXXXXX", VaultName: "123"}
+	json.NewEncoder(b).Encode(k)
+	req, err := http.NewRequest("PUT", "/api/v1/vaults", b)
+	req.Header.Set("Content-Type", "application/json")
+	resp := httptest.NewRecorder()
+	router.ServeHTTP(resp, req)
+	assert.Equal(t, 201, resp.Code, "http PUT Salt key success")
 
 	// Add
 	log.Println("= http POST People")
@@ -207,9 +216,10 @@ func TestE2ECrypto(t *testing.T) {
 	var urla = "/api/v1"
 	router.POST(urla+"/peoples", PostPeople)
 	router.GET(urla+"/peoples/:id", GetPeople)
-	router.GET(urla+"/verifkey/:id", GetVerifKey)
-	router.PUT(urla+"/verifkey/:id", UpdateVerifKey)
-	//router.PUT(urla+"/:id", UpdatePeople)
+	//router.GET(urla+"/verifkey/:id", GetVerifKey)
+	//router.PUT(urla+"/verifkey/:id", UpdateVerifKey)
+	router.GET(urla+"/vaults/:id", GetVault)
+	router.PUT(urla+"/vaults", PostVault)
 
 	log.Println("= Create scrypt key")
 	Salt, _ := newRandBytes(12)
@@ -226,14 +236,15 @@ func TestE2ECrypto(t *testing.T) {
 	//fmt.Printf("%+v %+v %+v\n", Saltb64, Nonceb64, Cipherb64)
 
 	b := new(bytes.Buffer)
-	var v = Util{Id: 1, VerifyKey: Saltb64 + Nonceb64 + Cipherb64}
+	//var v = Util{Id: 1, VerifyKey: Saltb64 + Nonceb64 + Cipherb64}
+	var v = Vault{VerifyKey: Saltb64 + Nonceb64 + Cipherb64, VaultName: "test"}
 	json.NewEncoder(b).Encode(v)
 	//fmt.Printf("%+v\n", b)
-	req, _ := http.NewRequest("PUT", urla+"/verifkey/1", b)
+	req, _ := http.NewRequest("PUT", urla+"/vaults", b)
 	req.Header.Set("Content-Type", "application/json")
 	resp := httptest.NewRecorder()
 	router.ServeHTTP(resp, req)
-	assert.Equal(t, 200, resp.Code, "Verify key set")
+	assert.Equal(t, 201, resp.Code, "Verify key set")
 
 	log.Println("= Create People with encrypted XAddress")
 	plaintext := "some private people text"

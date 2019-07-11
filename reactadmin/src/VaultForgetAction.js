@@ -1,20 +1,19 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import CardActions from '@material-ui/core/CardActions';
 import { showNotification as showNotificationAction } from 'react-admin';
 import { push as pushAction } from 'react-router-redux';
 import Button from '@material-ui/core/Button';
 
 
-const formStyle = { padding: '0 1em 3em 1em' };
-
-class RemovePassAction extends Component {
+class VaultForgetAction extends Component {
     constructor() {
         super();
         this.handleSubmit = this.handleSubmit.bind(this);
         const storedkey = localStorage.getItem('keyb64') || '';
         this.CurrentKey = storedkey;
+        const vault = localStorage.getItem('vault') || '';
+        this.CurrentVault = vault;
     }
 
     handleSubmit = (event) => {
@@ -22,7 +21,9 @@ class RemovePassAction extends Component {
         const { push, showNotification } = this.props;
         localStorage.removeItem('keyb64');
         localStorage.removeItem('salt');
-        showNotification('Password removed');
+        localStorage.removeItem('vault');
+        localStorage.removeItem('vaultid');
+        showNotification('Password forgeted');
         push('/');
     }
 
@@ -30,26 +31,16 @@ class RemovePassAction extends Component {
         if (this.CurrentKey !== '') 
         {
             return (
-                <CardActions>
-                    <form onSubmit={this.handleSubmit}>
-                        <div style={formStyle}>
-                            <Button type="submit" variant="raised" color="primary">Remove</Button>
-                        </div>
-                    </form>
-                </CardActions>
+                <span>&nbsp;&nbsp;&nbsp; <Button type="submit" variant="raised" color="secondary" onClick={this.handleSubmit}>Forget "{this.CurrentVault}" key</Button></span>
             );
         }
         else {
-            return (
-                <CardActions>
-                    <form><div style={formStyle}>Waiting for current passphrase</div></form>
-                </CardActions>
-            );	
+            return (<span />);	
         }
     }
 }
 
-RemovePassAction.propTypes = {
+VaultForgetAction.propTypes = {
 //    push: PropTypes.func,
     showNotification: PropTypes.func,
 };
@@ -57,5 +48,5 @@ RemovePassAction.propTypes = {
 export default connect(null, {
     showNotification: showNotificationAction,
     push: pushAction,
-})(RemovePassAction);
+})(VaultForgetAction);
 

@@ -112,11 +112,11 @@ func PostPeople(c *gin.Context) {
 		fmt.Println(people)
 	}
 
-	// XXX Check encrypted field match current key
-	if people.XAddress != "" && people.XAddress[0:16] != CurrentSalt {
+	// XXX Check encrypted field match a valid key
+	if people.XAddress != "" && TestValidSalt(dbmap, people.XAddress[0:16]) == false {
 		people.Name = ""
 	}
-	if people.XDateOfBirth != "" && people.XDateOfBirth[0:16] != CurrentSalt {
+	if people.XDateOfBirth != "" && TestValidSalt(dbmap, people.XDateOfBirth[0:16]) == false {
 		people.Name = ""
 	}
 
@@ -162,11 +162,12 @@ func UpdatePeople(c *gin.Context) {
 			Created:      people.Created, //people read from previous select
 		}
 
-		// XXX Check encrypted field match current key
-		if people.XAddress != "" && people.XAddress[0:16] != CurrentSalt {
+		// XXX Check encrypted field match a valid key
+		// else create mandatory field error
+		if people.XAddress != "" && TestValidSalt(dbmap, people.XAddress[0:16]) == false {
 			people.Name = ""
 		}
-		if people.XDateOfBirth != "" && people.XDateOfBirth[0:16] != CurrentSalt {
+		if people.XDateOfBirth != "" && TestValidSalt(dbmap, people.XDateOfBirth[0:16]) == false {
 			people.Name = ""
 		}
 
